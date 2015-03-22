@@ -42,13 +42,19 @@ var life = (function(){
         context = canvas.getContext("2d");
 
         scaleUniverse();
-        seedUniverse();
-        evolve();
-        evolve();
+        resetUniverse();
 
         setInterval(this.evolve, cycleTime);
 
         return this;
+    }
+
+    function resetUniverse(){
+        generation = 0;
+
+        seedUniverse();
+        evolve();
+        evolve();
     }
 
     function seedUniverse(){
@@ -154,9 +160,16 @@ var life = (function(){
 
             universeWidth = newWidth;
             universeHeight = newHeight;
+            var xCapacityPrevUniverse = xCapacityUniverse;
+            var yCapacityPrevUniverse = yCapacityUniverse;
             xCapacityUniverse = Math.ceil(universeWidth/celSize);
             yCapacityUniverse = Math.ceil(universeHeight/celSize);
             log('Canvas size changed to: ' + universeWidth + 'px x ' + universeHeight + 'px');
+
+            // Reset the universe when it expands.
+            if(xCapacityUniverse > xCapacityPrevUniverse  || yCapacityUniverse > yCapacityPrevUniverse) {
+                resetUniverse();
+            }
         }
     }
 
