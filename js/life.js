@@ -13,9 +13,9 @@ var life = (function(){
 
     var canvas;
     var context;
-    var fillColorLiveCells = '#000';
-    var fillColorDeadCells = '#FFF';
-    var fillColorRecentlyDeadCells = '#CCC';
+    var fillColorLiveCells = '#AB23CC';
+    var fillColorDeadCells = '#000';
+    var fillColorRecentlyDeadCells = "rgba(0, 0, 0, 0.9)";
     var fillColorLabels = '#777';
     var fillColorGrid = "#FFF";
 
@@ -51,6 +51,11 @@ var life = (function(){
 
     function resetUniverse(){
         generation = 0;
+
+        // An empty universe looks like dead cells.
+        context.globalAlpha=1;
+        context.fillStyle = fillColorDeadCells;
+        context.fillRect(0, 0, universeWidth, universeHeight);
 
         seedUniverse();
         evolve();
@@ -174,36 +179,114 @@ var life = (function(){
     }
 
     function drawUniverse(){
-        for(var x = 0; x < cellsCurrentGen.length; x++) {
-            var col = cellsCurrentGen[x];
-            for(var y = 0; y < col.length; y++) {
-                var cel = cellsCurrentGen[x][y];
-
-                if(cel.state === 1) {
-                    context.fillStyle = fillColorLiveCells;
-                }else{
-                    if(cel.statePrevGen ===1){
-                        context.fillStyle = fillColorRecentlyDeadCells;
-                    }else{
-                        context.fillStyle = fillColorDeadCells;
-                    }
-                }
-                context.fillRect(x * celSize, y * celSize, celSize, celSize);
-
-                if(showLabels) {
-                    //var label = x + "," + y;
-                    var label = cel.livingNeighbours + ' (' + cel.livingNeighboursPrevGen + ')';
-                    var labelX = x * celSize + 3.5
-                    var labelY = y * celSize + 14.5
-                    context.font = "14px sans-serif";
-                    context.fillStyle = fillColorLabels;
-                    context.fillText(label, labelX, labelY);
-                }
-            }
-        }
+        var states = ['dead', 'diedRecently', 'alive'];
+        states.forEach(function(state) {
+            _renderState(state);
+        });
 
         if(gridEnabled){
             drawGrid();
+        }
+    }
+
+    function _renderState(state){
+        //Moving this BG paint code insde draw() will help remove the trail
+        //of the particle
+        //Lets paint the canvas black
+        //But the BG paint shouldn't blend with the previous frame
+        context.globalCompositeOperation = "source-over";
+        //Lets reduce the opacity of the BG paint to give the final touch
+        context.fillStyle = "rgba(0, 0, 0, 0.3)";
+        context.fillRect(0, 0, universeWidth, universeHeight);
+
+        //Lets blend the particle with the BG
+        context.globalCompositeOperation = "lighter";
+
+
+        if(state == 'alive'){
+            context.globalAlpha=1;
+        }else{
+            //context.globalAlpha=0.3;
+        }
+
+        for (var x = 0; x < cellsCurrentGen.length; x++) {
+            for (var y = 0; y < cellsCurrentGen[x].length; y++) {
+                var render = false;
+                var celColor, celInnerColor;
+                var cel = cellsCurrentGen[x][y];
+
+                if(state == 'dead' && cel.statePrevGen == 0 && cel.state == 0){
+                    render = true;
+                    celColor = fillColorDeadCells;
+                    celInnerColor = "#000";
+                }
+                if(state == 'diedRecently' && cel.statePrevGen == 1 && cel.state == 0){
+                    render = true;
+                    celColor = fillColorRecentlyDeadCells;
+                    celInnerColor = "#000";
+                }
+                if(state == 'alive' && cel.state == 1){
+                    render = true;
+                    celColor = fillColorLiveCells;
+                    celInnerColor = "#FFF";
+                }
+
+                if(render) {
+                    context.fillStyle = celColor;
+
+                    //// Squares
+                    //context.fillRect(x * celSize, y * celSize, celSize, celSize);
+
+                    // Circles
+                    context.beginPath();
+                    var xPos = x * celSize + (celSize / 2)
+                    var yPos = y * celSize + (celSize / 2)
+                    context.arc(xPos, yPos, celSize/3, 0, 2 * Math.PI, false);
+                    context.fill();
+
+
+                    context.beginPath();
+                    var xPos = x * celSize + (celSize / 2)
+                    var yPos = y * celSize + (celSize / 2)
+                    context.arc(xPos, yPos, celSize/20, 0, 2 * Math.PI, false);
+                    context.fillStyle = celInnerColor;
+                    context.fill();
+
+                    //// Fading Circles
+                    //var innerRadius = 0;
+                    //var outerRadius = celSize / 1.4;
+                    //var xPos = x * celSize + (celSize / 2)
+                    //var yPos = y * celSize + (celSize / 2)
+                    //
+                    //if(state == 'alive' || state == 'diedRecently') {
+                    //    if(state == 'alive'){
+                    //        outerRadius = (Math.random()/2+1)*outerRadius;
+                    //    }
+                    //
+                    //    var gradient = context.createRadialGradient(xPos, yPos, innerRadius, xPos, yPos, outerRadius);
+                    //    gradient.addColorStop(0, celInnerColor);
+                    //    gradient.addColorStop(0.1, celInnerColor);
+                    //    gradient.addColorStop(0.8, "#000");
+                    //    gradient.addColorStop(0.9, celColor);
+                    //    gradient.addColorStop(1, "black");
+                    //    context.fillStyle = gradient;
+                    //}
+                    //
+                    //context.beginPath();
+                    //context.arc(xPos, yPos, outerRadius, 0, 2 * Math.PI, false);
+                    //context.fill();
+                }
+
+                //if (showLabels) {
+                //    //var label = x + "," + y;
+                //    var label = cel.livingNeighbours + ' (' + cel.livingNeighboursPrevGen + ')';
+                //    var labelX = x * celSize + 3.5
+                //    var labelY = y * celSize + 14.5
+                //    context.font = "14px sans-serif";
+                //    context.fillStyle = fillColorLabels;
+                //    context.fillText(label, labelX, labelY);
+                //}
+            }
         }
     }
 

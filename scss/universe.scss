@@ -18,6 +18,7 @@ $bg: #FFF;
 $cog_color: #CCC;
 $title-size: 24px;
 $text-size: 12px;
+$celColor: #ab23cc;
 
 body {
   margin: 0;
@@ -26,20 +27,25 @@ body {
   font-size: $text-size;
 }
 
+canvas {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
 footer{
   position: absolute;
   bottom: 0px;
   width: 100%;
 
+
   .inner{
-    display: inline-block;
-    margin-bottom: -5px;
-
-    background-color: darken($bg, 70);
-    padding: 10px 30px 10px 20px;
-
     @include opacity(0.95);
-    @include box-shadow(0px, 0px, 8px, #000);
+//    @include box-shadow(0px, 0px, 8px, #000);
+
+    display: inline-block;
+    padding: 0px 30px 0px 20px;
+    margin-bottom: 2px;
 
     .cogwheel{
       display: inline-block;
@@ -49,15 +55,18 @@ footer{
       max-height: 0px;
       overflow: hidden;
       @include transition-property(all);
-      @include transition-duration(2s);
+      @include transition-duration(1s);
       @include transition-delay(1s);
-      margin-top: 4px;
+      margin-top: 0px;
     }
 
     &:hover{
+
       .controls{
-        max-height: 99px;
+        @include box-shadow(0px, 0px, 8px, #000);
+        background-color: darken($bg, 10);
         @include transition-delay(0s);
+        max-height: 99px;
       }
     }
   }
