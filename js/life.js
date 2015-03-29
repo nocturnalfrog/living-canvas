@@ -4,6 +4,7 @@ var Cel = (function(x, y, state){
     this.x = x;
     this.y = y;
     this.state = state;
+    this.age = 0;
 });
 
 var life = (function(){
@@ -17,7 +18,7 @@ var life = (function(){
     var fillColorDeadCells = '#000';
     var fillColorRecentlyDeadCells = "rgba(0, 0, 0, 0.9)";
     var fillColorLabels = '#777';
-    var fillColorGrid = "#FFF";
+    var fillColorGrid = "rgba(255, 255, 255, 0.5)";
 
     var universeWidth = 0;
     var universeHeight = 0;
@@ -29,6 +30,8 @@ var life = (function(){
     var cellsCurrentGen = [];
     var cellsNextGen = [];
     var generation = 0;
+    var evolutionTimer = null;
+    var suppressRendering = false;
 
 
     function createUniverse(universeSelector, options){
@@ -44,9 +47,51 @@ var life = (function(){
         scaleUniverse();
         resetUniverse();
 
-        setInterval(this.evolve, cycleTime);
-
         return this;
+    }
+
+    function toggleEvolution(){
+        if(!isEvolving()){
+            startEvolving();
+        }else{
+            stopEvolving();
+        }
+    }
+
+    function isEvolving(){
+        if(evolutionTimer != null){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    function startEvolving(){
+        log("Starting Evolution...");
+        evolutionTimer = setInterval(evolve, cycleTime);
+    }
+
+    function stopEvolving(){
+        log("Halting evolution.");
+        clearInterval(evolutionTimer);
+        evolutionTimer = null;
+    }
+
+    function setCycleTime(newCycleTime){
+        cycleTime = newCycleTime;
+
+        // If evolution is in progress we need to reset the timer.
+        if(isEvolving()){
+            stopEvolving();
+            startEvolving();
+        }
+    }
+
+    function setCelSize(newCelSize){
+        celSize = newCelSize;
+
+        scaleUniverse(true);
+        resetUniverse();
     }
 
     function resetUniverse(){
@@ -63,6 +108,9 @@ var life = (function(){
     }
 
     function seedUniverse(){
+        cellsCurrentGen = [];
+        cellsNextGen = [];
+
         for(var x = 0; x < xCapacityUniverse; x++) {
             cellsCurrentGen[x] = [];
             cellsNextGen[x] = [];
@@ -76,8 +124,7 @@ var life = (function(){
         scaleUniverse();
 
         for(var x = 0; x < cellsCurrentGen.length; x++) {
-            var col = cellsCurrentGen[x];
-            for (var y = 0; y < col.length; y++) {
+            for (var y = 0; y < cellsCurrentGen[x].length; y++) {
                 var newState = 0;
                 var cel = cellsCurrentGen[x][y];
 
@@ -90,9 +137,11 @@ var life = (function(){
                     if (livingNeighbours == 2 || livingNeighbours == 3) {
                         // Living cell proceed to the next generation
                         newState = 1;
+                        cel.age = cel.age +1;
                     } else {
                         // Living cell dies of either overcrowding / under-population
                         newState = 0;
+                        cel.age = 0;
                     }
                 }else{
                     // Evaluate dead cell
@@ -105,6 +154,7 @@ var life = (function(){
                 nextGenCel.livingNeighboursPrevGen = cel.livingNeighbours;
                 if(generation > 1) {
                     nextGenCel.statePrevGen = cel.state;
+                    nextGenCel.age = cel.age;
                 }
                 cellsNextGen[x][y] = nextGenCel;
             }
@@ -128,7 +178,7 @@ var life = (function(){
         cellsCurrentGen = cellsNextGen;
         cellsNextGen = tmp;
 
-        if(generation > 0) {
+        if(generation > 0 && !suppressRendering) {
             drawUniverse();
         }
         generation++;
@@ -156,10 +206,12 @@ var life = (function(){
         return livingNeighbours;
     }
 
-    function scaleUniverse(){
+    function scaleUniverse(force){
+        force = force || false;
+
         var newWidth = window.innerWidth;
         var newHeight = window.innerHeight;
-        if(newWidth != universeWidth || newHeight != universeHeight){
+        if(force || newWidth != universeWidth || newHeight != universeHeight){
             context.canvas.width  = newWidth;
             context.canvas.height = newHeight;
 
@@ -179,9 +231,9 @@ var life = (function(){
     }
 
     function drawUniverse(){
-        var states = ['dead', 'diedRecently', 'alive'];
-        states.forEach(function(state) {
-            _renderState(state);
+        var phases = ['dead', 'diedRecently', 'alive'];
+        phases.forEach(function(phase) {
+            _render(phase);
         });
 
         if(gridEnabled){
@@ -189,7 +241,7 @@ var life = (function(){
         }
     }
 
-    function _renderState(state){
+    function _render(renderPhase){
         //Moving this BG paint code insde draw() will help remove the trail
         //of the particle
         //Lets paint the canvas black
@@ -203,7 +255,7 @@ var life = (function(){
         context.globalCompositeOperation = "lighter";
 
 
-        if(state == 'alive'){
+        if(renderPhase == 'alive'){
             context.globalAlpha=1;
         }else{
             //context.globalAlpha=0.3;
@@ -215,48 +267,53 @@ var life = (function(){
                 var celColor, celInnerColor;
                 var cel = cellsCurrentGen[x][y];
 
-                if(state == 'dead' && cel.statePrevGen == 0 && cel.state == 0){
+                if(renderPhase == 'dead' && cel.statePrevGen == 0 && cel.state == 0){
                     render = true;
                     celColor = fillColorDeadCells;
                     celInnerColor = "#000";
                 }
-                if(state == 'diedRecently' && cel.statePrevGen == 1 && cel.state == 0){
+                if(renderPhase == 'diedRecently' && cel.statePrevGen == 1 && cel.state == 0){
                     render = true;
                     celColor = fillColorRecentlyDeadCells;
                     celInnerColor = "#000";
                 }
-                if(state == 'alive' && cel.state == 1){
+                if(renderPhase == 'alive' && cel.state == 1){
                     render = true;
                     celColor = fillColorLiveCells;
                     celInnerColor = "#FFF";
                 }
 
                 if(render) {
+                    // Increase cel size with age
+                    //var agedCelSize = Math.min((0.8+(cel.age/40)), 4) * celSize;
+                    var agedCelSize = celSize;
+
+
                     context.fillStyle = celColor;
 
                     //// Squares
-                    //context.fillRect(x * celSize, y * celSize, celSize, celSize);
+                    //context.fillRect(x*celSize - (agedCelSize-celSize), y*celSize - (agedCelSize-celSize), agedCelSize, agedCelSize);
 
                     // Circles
                     context.beginPath();
                     var xPos = x * celSize + (celSize / 2)
                     var yPos = y * celSize + (celSize / 2)
-                    context.arc(xPos, yPos, celSize/3, 0, 2 * Math.PI, false);
+                    context.arc(xPos, yPos, agedCelSize/3, 0, 2 * Math.PI, true);
                     context.fill();
 
 
-                    context.beginPath();
-                    var xPos = x * celSize + (celSize / 2)
-                    var yPos = y * celSize + (celSize / 2)
-                    context.arc(xPos, yPos, celSize/20, 0, 2 * Math.PI, false);
-                    context.fillStyle = celInnerColor;
-                    context.fill();
+                    //context.beginPath();
+                    //var xPos = x * celSize + (celSize / 2)
+                    //var yPos = y * celSize + (celSize / 2)
+                    //context.arc(xPos, yPos, agedCelSize/20, 0, 2 * Math.PI, false);
+                    //context.fillStyle = celInnerColor;
+                    //context.fill();
 
                     //// Fading Circles
                     //var innerRadius = 0;
-                    //var outerRadius = celSize / 1.4;
-                    //var xPos = x * celSize + (celSize / 2)
-                    //var yPos = y * celSize + (celSize / 2)
+                    //var outerRadius = agedCelSize / 1.4;
+                    //var xPos = x * agedCelSize + (agedCelSize / 2)
+                    //var yPos = y * agedCelSize + (agedCelSize / 2)
                     //
                     //if(state == 'alive' || state == 'diedRecently') {
                     //    if(state == 'alive'){
@@ -280,8 +337,8 @@ var life = (function(){
                 //if (showLabels) {
                 //    //var label = x + "," + y;
                 //    var label = cel.livingNeighbours + ' (' + cel.livingNeighboursPrevGen + ')';
-                //    var labelX = x * celSize + 3.5
-                //    var labelY = y * celSize + 14.5
+                //    var labelX = x * agedCelSize + 3.5
+                //    var labelY = y * agedCelSize + 14.5
                 //    context.font = "14px sans-serif";
                 //    context.fillStyle = fillColorLabels;
                 //    context.fillText(label, labelX, labelY);
@@ -292,7 +349,6 @@ var life = (function(){
 
     function setGridEnabled(enabled){
         gridEnabled = enabled;
-        drawUniverse();
     }
 
     function drawGrid(){
@@ -325,6 +381,12 @@ var life = (function(){
         scaleUniverse: scaleUniverse,
         drawGrid: drawGrid,
         log: log,
-        setGridEnabled: setGridEnabled
+        setGridEnabled: setGridEnabled,
+        toggleEvolution: toggleEvolution,
+        resetUniverse: resetUniverse,
+        startEvolving: startEvolving,
+        stopEvolving: stopEvolving,
+        setCycleTime: setCycleTime,
+        setCelSize: setCelSize
     }
 }());
