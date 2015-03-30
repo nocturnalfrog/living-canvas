@@ -11,10 +11,10 @@
         <script src="/js/life.js"></script>
         <script>
             $(document).ready(function(){
-                var celSize = 20;
+                var celSize = 5;
                 $("#celsize").val(celSize);
 
-                var cycleTime = 1000/1;
+                var cycleTime = 400;
                 $("#delay").val(cycleTime);
 
                 var myLife;
@@ -32,6 +32,10 @@
 
                 $("#startstop").click(function(){
                     myLife.toggleEvolution();
+                });
+
+                $("#next").click(function(){
+                    myLife.evolve();
                 });
 
                 $("#reset").click(function(){
@@ -64,19 +68,20 @@
                 <div class="controls">
                     <div class="buttons">
                         <button class="button" id="startstop">start/stop</button>
+                        <button class="button" id="next">next</button>
                         <button class="button" id="reset">reset</button>
                     </div>
                     <div class="range-slider">
-                        <label>Delay: </label><br>
+                        <label>Generation lifetime: </label><br>
                         <input type="range" name="delay" id="delay" min="20" max="2000"><br>
                     </div>
 
                     <div class="range-slider">
                         <label>Size: </label><br>
-                        <input type="range" name="size" id="celsize" min="4" max="200"><br>
+                        <input type="range" name="size" id="celsize" min="1" max="120"><br>
                     </div>
                     <div class="advanced">
-                        <label><input type="checkbox" id="showGrid" name="showGrid" value="">Show Grid</label><br>
+                        <!--<label><input type="checkbox" id="showGrid" name="showGrid" value="">Show Grid</label><br>-->
                     </div>
                 </div>
             </div>
