@@ -10,22 +10,12 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
         <script src="/js/life.js"></script>
         <script>
+            function updateRangeLabel(id, value, suffix){
+                $(id).html(value + suffix);
+            }
+
             $(document).ready(function(){
-                var celSize = 5;
-                $("#celsize").val(celSize);
-
-                var cycleTime = 400;
-                $("#delay").val(cycleTime);
-
-                var myLife;
-                myLife = life.createUniverse('#universe', {
-                    hasGrid:false,
-                    debugMode:true,
-                    celSize:celSize,
-                    cycleTime: cycleTime
-                });
-                myLife.startEvolving();
-
+                // EventListeners
                 $("#showGrid").click(function(){
                     myLife.setGridEnabled(this.checked);
                 });
@@ -42,15 +32,46 @@
                     myLife.resetUniverse();
                 });
 
-                $("#delay").change(function(){
-                    var newCycleTime = $("#delay").val();
+                $("#lifetime").change(function(){
+                    var newCycleTime = $("#lifetime").val();
+                    updateRangeLabel("#lifetime_label", newCycleTime, 'ms');
                     myLife.setCycleTime(newCycleTime);
                 });
 
                 $("#celsize").change(function(){
                     var newCelSize = $("#celsize").val();
+                    updateRangeLabel("#celsize_label", newCelSize, 'px');
                     myLife.setCelSize(newCelSize);
                 });
+
+                $("#celsize").mousemove(function () {
+                    updateRangeLabel("#celsize_label", $("#celsize").val(), 'px');
+                });
+
+                $("#lifetime").mousemove(function () {
+                    updateRangeLabel("#lifetime_label", $("#lifetime").val(), 'ms');
+                });
+
+
+                // Initialization
+                var celSize = 5;
+                $("#celsize").val(celSize);
+                updateRangeLabel("#celsize_label", celSize, 'px');
+
+
+                var cycleTime = 400;
+                $("#lifetime").val(cycleTime);
+                updateRangeLabel("#lifetime_label", cycleTime, 'ms');
+
+
+                var myLife;
+                myLife = life.createUniverse('#universe', {
+                    hasGrid:false,
+                    debugMode:true,
+                    celSize:celSize,
+                    cycleTime: cycleTime
+                });
+                myLife.startEvolving();
             });
         </script>
     </head>
@@ -72,17 +93,17 @@
                         <button class="button" id="reset">reset</button>
                     </div>
                     <div class="range-slider">
-                        <label>Generation lifetime: </label><br>
-                        <input type="range" name="delay" id="delay" min="20" max="2000"><br>
+                        <label>Generation lifetime: </label><span id="lifetime_label">999ms</span><br>
+                        <input type="range" name="lifetime" id="lifetime" step="10" min="20" max="2000"><br>
                     </div>
 
                     <div class="range-slider">
-                        <label>Size: </label><br>
-                        <input type="range" name="size" id="celsize" min="1" max="120"><br>
+                        <label>Cel Size: </label><span id="celsize_label">999px</span><br>
+                        <input type="range" name="size" id="celsize" min="1" max="80"><br>
                     </div>
-                    <div class="advanced">
+                    <!--<div class="advanced">-->
                         <!--<label><input type="checkbox" id="showGrid" name="showGrid" value="">Show Grid</label><br>-->
-                    </div>
+                    <!--</div>-->
                 </div>
             </div>
         </footer>

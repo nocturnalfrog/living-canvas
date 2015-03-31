@@ -8,7 +8,7 @@ var Cel = (function(x, y, state){
 });
 
 var life = (function(){
-    var debugMode = true;
+    var verboseMode, extremeVerboseMode = false;
     var showLabels = false;
     var gridEnabled = true;
 
@@ -36,7 +36,8 @@ var life = (function(){
 
     function createUniverse(universeSelector, options){
         var options = options || {};
-        debugMode = (typeof options.debugMode !== 'undefined') ? options.debugMode : debugMode;
+        verboseMode = (typeof options.debugMode !== 'undefined') ? options.debugMode : verboseMode;
+        extremeVerboseMode = (typeof options.extremeVerboseMode !== 'undefined') ? options.extremeVerboseMode : extremeVerboseMode;
         gridEnabled = (typeof options.hasGrid !== 'undefined') ? options.hasGrid : gridEnabled;
         celSize = (typeof options.celSize !== 'undefined') ? options.celSize : celSize;
         cycleTime = (typeof options.cycleTime !== 'undefined') ? options.cycleTime : cycleTime;
@@ -170,7 +171,7 @@ var life = (function(){
         cellsNextGen = tmp;
 
         var t1 = performance.now();
-        console.log("Call to evolving took " + Math.round(t1 - t0) + " milliseconds.")
+        log("Call to evolving took " + Math.round(t1 - t0) + " milliseconds.", 'trivial');
 
         if(generation > 0 && !suppressRendering) {
             drawUniverse();
@@ -243,7 +244,7 @@ var life = (function(){
         }
 
         var t1 = performance.now();
-        log("Call to drawUniverse took " + Math.round(t1 - t0) + " milliseconds.")
+        log("Call to drawUniverse took " + Math.round(t1 - t0) + " milliseconds.", 'trivial');
     }
 
     function _render(renderPhase){
@@ -375,10 +376,21 @@ var life = (function(){
         context.stroke();
     }
 
-    function log(message, isCritical){
-        isCritical = (typeof isCritical !== 'undefined') ? isCritical : false;
-        if(debugMode || isCritical){
-            console.log(message)
+    function log(message, level){
+        level = (typeof level !== 'undefined') ? level : "debug";
+
+        var shouldLog = false;
+        if(verboseMode && level == 'debug'){
+            shouldLog = true;
+        }else if(extremeVerboseMode){
+            shouldLog = true;
+        }else if(level == 'error'){
+            shouldLog = true;
+        }
+
+
+        if(shouldLog){
+            console.log(message);
         }
     }
 
