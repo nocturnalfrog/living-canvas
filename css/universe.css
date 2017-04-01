@@ -121,6 +121,7 @@ footer .inner .cogwheel {
 }
 /* line 75, ../scss/universe.scss */
 footer .inner .controls {
+  max-height: 0px;
   padding: 0 12px;
   overflow: hidden;
   -moz-transition-property: all;

@@ -73,7 +73,7 @@ footer{
     }
 
     .controls{
-      //max-height: 0px;
+      max-height: 0px;
       padding: 0 12px;
       overflow: hidden;
       @include transition-property(all);
