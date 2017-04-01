@@ -3,42 +3,42 @@
     <head>
         <title>CanvasLife</title>
         <meta charset="utf-8">
-        <meta name="description" content="HTML5 canvas implementation of Conway's Game of Life." />
-        <meta name="author" content="Tjerk Ameel" />
-        <meta name="robots" content="index, follow" />
-        <link rel="stylesheet" href="/css/universe.css" media="all" />
+        <meta name="description" content="HTML5 canvas implementation of Conway's Game of Life."/>
+        <meta name="author" content="Tjerk Ameel"/>
+        <meta name="robots" content="index, follow"/>
+        <link rel="stylesheet" href="/css/universe.css" media="all"/>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
         <script src="/js/life.js"></script>
         <script>
-            function updateRangeLabel(id, value, suffix){
+            function updateRangeLabel(id, value, suffix) {
                 $(id).html(value + suffix);
             }
 
-            $(document).ready(function(){
+            $(document).ready(function () {
                 // EventListeners
-                $("#showGrid").click(function(){
+                $("#showGrid").click(function () {
                     myLife.setGridEnabled(this.checked);
                 });
 
-                $("#startstop").click(function(){
+                $("#startstop").click(function () {
                     myLife.toggleEvolution();
                 });
 
-                $("#next").click(function(){
+                $("#next").click(function () {
                     myLife.evolve();
                 });
 
-                $("#reset").click(function(){
+                $("#reset").click(function () {
                     myLife.resetUniverse();
                 });
 
-                $("#lifetime").change(function(){
+                $("#lifetime").change(function () {
                     var newCycleTime = $("#lifetime").val();
                     updateRangeLabel("#lifetime_label", newCycleTime, 'ms');
                     myLife.setCycleTime(newCycleTime);
                 });
 
-                $("#celsize").change(function(){
+                $("#celsize").change(function () {
                     var newCelSize = $("#celsize").val();
                     updateRangeLabel("#celsize_label", newCelSize, 'px');
                     myLife.setCelSize(newCelSize);
@@ -59,17 +59,18 @@
                 updateRangeLabel("#celsize_label", celSize, 'px');
 
 
-                var cycleTime = 400;
+                var cycleTime = 240;
                 $("#lifetime").val(cycleTime);
                 updateRangeLabel("#lifetime_label", cycleTime, 'ms');
 
 
                 var myLife;
                 myLife = life.createUniverse('#universe', {
-                    hasGrid:false,
-                    debugMode:true,
-                    celSize:celSize,
-                    cycleTime: cycleTime
+                    hasGrid: false,
+                    debugMode: true,
+                    celSize: celSize,
+                    cycleTime: cycleTime,
+                    startStopButtonSelector: '#startstop'
                 });
                 myLife.startEvolving();
             });
@@ -83,7 +84,7 @@
         <footer>
             <div class="inner">
                 <div class="settings-toggle">
-                    <div class="cogwheel">COG</div>
+                    <img class="cogwheel" src="images/cog.svg" width="36" height="36" alt="settings"/>
                     <h1>Living Canvas</h1>
                 </div>
                 <div class="controls">
@@ -94,15 +95,15 @@
                     </div>
                     <div class="range-slider">
                         <label>Generation lifetime: </label><span id="lifetime_label">999ms</span><br>
-                        <input type="range" name="lifetime" id="lifetime" step="10" min="20" max="2000"><br>
+                        <input type="range" name="lifetime" id="lifetime" step="10" min="20" max="1000"><br>
                     </div>
 
                     <div class="range-slider">
                         <label>Cel Size: </label><span id="celsize_label">999px</span><br>
-                        <input type="range" name="size" id="celsize" min="1" max="80"><br>
+                        <input type="range" name="size" id="celsize" min="1" max="60"><br>
                     </div>
                     <!--<div class="advanced">-->
-                        <!--<label><input type="checkbox" id="showGrid" name="showGrid" value="">Show Grid</label><br>-->
+                    <!--<label><input type="checkbox" id="showGrid" name="showGrid" value="">Show Grid</label><br>-->
                     <!--</div>-->
                 </div>
             </div>

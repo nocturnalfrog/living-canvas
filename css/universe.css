@@ -17,7 +17,7 @@ body {
 
 /* line 21, ../scss/universe.scss */
 h1 {
-  font-size: 32px;
+  font-size: 28px;
   padding: 0;
   margin: 0;
   color: #FFF;
@@ -80,7 +80,7 @@ canvas {
   background-color: #5e5e5e;
   background: -webkit-gradient(linear, left top, left bottom, from(#444), to(#5e5e5e));
   background: -moz-linear-gradient(top, #444, #5e5e5e);
-  color: #c6c6c6;
+  color: #c7c7c7;
 }
 
 /* line 46, ../scss/universe.scss */
@@ -109,20 +109,28 @@ footer .inner {
 /* line 68, ../scss/universe.scss */
 footer .inner .cogwheel {
   display: inline-block;
+  margin-bottom: -5px;
+  -moz-transition-duration: 3s;
+  -o-transition-duration: 3s;
+  -webkit-transition-duration: 3s;
+  transition-duration: 3s;
+  -moz-transition-timing-function: "ease-in-out";
+  -o-transition-timing-function: "ease-in-out";
+  -webkit-transition-timing-function: "ease-in-out";
+  transition-timing-function: "ease-in-out";
 }
-/* line 72, ../scss/universe.scss */
+/* line 75, ../scss/universe.scss */
 footer .inner .controls {
-  max-height: 0px;
   padding: 0 12px;
   overflow: hidden;
   -moz-transition-property: all;
   -o-transition-property: all;
   -webkit-transition-property: all;
   transition-property: all;
-  -moz-transition-duration: 1s;
-  -o-transition-duration: 1s;
-  -webkit-transition-duration: 1s;
-  transition-duration: 1s;
+  -moz-transition-duration: 0.5s;
+  -o-transition-duration: 0.5s;
+  -webkit-transition-duration: 0.5s;
+  transition-duration: 0.5s;
   -moz-transition-delay: 1s;
   -o-transition-delay: 1s;
   -webkit-transition-delay: 1s;
@@ -133,24 +141,35 @@ footer .inner .controls {
   -moz-box-shadow: 0px 4px 4px #000;
   box-shadow: 0px 4px 4px #000;
 }
-/* line 83, ../scss/universe.scss */
+/* line 86, ../scss/universe.scss */
 footer .inner .controls > div {
   margin: 10px 0;
   padding: 2px 0 10px;
 }
-/* line 90, ../scss/universe.scss */
+/* line 93, ../scss/universe.scss */
+footer .inner:hover .cogwheel {
+  -moz-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+  -moz-transition-duration: 3s;
+  -o-transition-duration: 3s;
+  -webkit-transition-duration: 3s;
+  transition-duration: 3s;
+}
+/* line 98, ../scss/universe.scss */
 footer .inner:hover .controls {
-  -moz-transition-delay: 0s;
-  -o-transition-delay: 0s;
-  -webkit-transition-delay: 0s;
-  transition-delay: 0s;
+  -moz-transition-delay: 0.2s;
+  -o-transition-delay: 0.2s;
+  -webkit-transition-delay: 0.2s;
+  transition-delay: 0.2s;
   -webkit-box-shadow: 6px 4px 4px #000;
   -moz-box-shadow: 6px 4px 4px #000;
   box-shadow: 6px 4px 4px #000;
   max-height: 180px;
 }
 
-/* line 99, ../scss/universe.scss */
+/* line 107, ../scss/universe.scss */
 #lifetime,
 #celsize {
   width: 180px;

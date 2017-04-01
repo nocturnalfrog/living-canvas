@@ -6,7 +6,7 @@
 // Variables
 $bg: #FFF;
 $cog_color: #CCC;
-$title-size: 32px;
+$title-size: 28px;
 $text-size: 12px;
 $text-color: #FFF;
 $celColor: #ab23cc;
@@ -67,14 +67,17 @@ footer{
 
     .cogwheel{
       display: inline-block;
+      margin-bottom: -5px;
+      @include transition-duration(3s);
+      @include transition-timing-function('ease-in-out');
     }
 
     .controls{
-      max-height: 0px;
+      //max-height: 0px;
       padding: 0 12px;
       overflow: hidden;
       @include transition-property(all);
-      @include transition-duration(1s);
+      @include transition-duration(0.5s);
       @include transition-delay(1s);
       margin-top: 0px;
       background-color: darken($bg, 85);
@@ -87,8 +90,13 @@ footer{
     }
 
     &:hover{
+      .cogwheel{
+        @include rotate(180deg);
+        @include transition-duration(3s);
+      }
+
       .controls{
-        @include transition-delay(0s);
+        @include transition-delay(0.2s);
         @include box-shadow(6px, 4px, 4px, #000);
         max-height: 180px;
       }
