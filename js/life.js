@@ -1,6 +1,6 @@
 'use strict';
 
-var Cel = (function (x, y, state) {
+const Cel = (function (x, y, state) {
     this.x = x;
     this.y = y;
     this.state = state;
@@ -9,55 +9,55 @@ var Cel = (function (x, y, state) {
     this.statePrevGen = null;
 });
 
-var life = (function () {
-    var verboseMode, extremeVerboseMode = false;
-    var showLabels = false;
-    var gridEnabled = true;
+const life = (function () {
+    let verboseMode, extremeVerboseMode = false;
+    const showLabels = false;
+    let gridEnabled = true;
 
-    var canvas;
-    var context;
-    var startStopButtonSelector;
+    let canvas;
+    let context;
+    let startStopButtonSelector;
 
     // var fillColorLiveCells = '#AB23CC';
-    var fillColorLiveCells = 'rgba(240, 80, 235, 1)';
-    var generationOverlayColor = "rgba(0, 0, 0, 0.4)"
+    let fillColorLiveCells = 'rgba(240, 80, 235, 1)';
+    const generationOverlayColor = "rgba(0, 0, 0, 0.4)"
     // var fillColorLiveCells = 'rgba(220, 90, 255, 1)';
-    var fillColorDeadCells = '#000';
-    var fillColorRecentlyDeadCells = "rgba(0, 0, 0, 0.9)";
-    var fillColorLabels = '#777';
-    var fillColorGrid = "rgba(255, 255, 255, 0.5)";
+    const fillColorDeadCells = '#000';
+    const fillColorRecentlyDeadCells = "rgba(0, 0, 0, 0.9)";
+    const fillColorLabels = '#777';
+    const fillColorGrid = "rgba(255, 255, 255, 0.5)";
 
-    var universeWidth = 0;
-    var universeHeight = 0;
-    var xCapacityUniverse = 0;
-    var yCapacityUniverse = 0;
+    let universeWidth = 0;
+    let universeHeight = 0;
+    let xCapacityUniverse = 0;
+    let yCapacityUniverse = 0;
 
-    var celSize = 40;
-    var cycleTime = 1000;
-    var maxAge = 20;
+    let celSize = 40;
+    let cycleTime = 1000;
+    const maxAge = 20;
 
-    var cellsCurrentGen = [];
-    var cellsNextGen = [];
-    var generation = 0;
+    let cellsCurrentGen = [];
+    let cellsNextGen = [];
+    let generation = 0;
 
-    var evolutionTimer = null;
-    var lastEvolvedAt = 0;
-    var suppressRendering = false;
+    let evolutionTimer = null;
+    let lastEvolvedAt = 0;
+    const suppressRendering = false;
 
     // FPS counter
-    var fpsSelector;
-    var fpsFrames = 0;
-    var fpsLastSample = 0;
-    var fpsSampleInterval = 500;
+    let fpsSelector;
+    let fpsFrames = 0;
+    let fpsLastSample = 0;
+    const fpsSampleInterval = 500;
 
     // Calculate the endAngle of full circle once for extra performance
-    var endAngle = 2 * Math.PI;
+    const endAngle = 2 * Math.PI;
     // Calculate the maxAgeAnimationThreshold once for extra performance
-    var maxAgeAnimationThreshold = maxAge * 0.98;
+    const maxAgeAnimationThreshold = maxAge * 0.98;
 
 
     function createUniverse(universeSelector, options) {
-        var options = options || {};
+        options = options || {};
         verboseMode = (typeof options.debugMode !== 'undefined') ? options.debugMode : verboseMode;
         extremeVerboseMode = (typeof options.extremeVerboseMode !== 'undefined') ? options.extremeVerboseMode : extremeVerboseMode;
         gridEnabled = (typeof options.hasGrid !== 'undefined') ? options.hasGrid : gridEnabled;
@@ -149,9 +149,9 @@ var life = (function () {
         context.fillStyle = fillColorDeadCells;
         context.fillRect(0, 0, universeWidth, universeHeight);
 
-        var randomRed = Math.ceil(Math.random() * 255);
-        var randomGreen = Math.ceil(Math.random() * 255);
-        var randomBlue = Math.ceil(Math.random() * 255);
+        const randomRed = Math.ceil(Math.random() * 255);
+        const randomGreen = Math.ceil(Math.random() * 255);
+        const randomBlue = Math.ceil(Math.random() * 255);
         fillColorLiveCells = 'rgba(' + randomRed + ', ' + randomGreen + ', ' + randomBlue + ', 1)';
         console.log(fillColorLiveCells);
 
@@ -164,10 +164,10 @@ var life = (function () {
         cellsCurrentGen = [xCapacityUniverse];
         cellsNextGen = [xCapacityUniverse];
 
-        for (var x = 0; x < xCapacityUniverse; x++) {
+        for (let x = 0; x < xCapacityUniverse; x++) {
             cellsCurrentGen[x] = [yCapacityUniverse];
             cellsNextGen[x] = [yCapacityUniverse];
-            for (var y = 0; y < yCapacityUniverse; y++) {
+            for (let y = 0; y < yCapacityUniverse; y++) {
                 cellsCurrentGen[x][y] = new Cel(x, y, Math.round(Math.random()), -1);
                 cellsNextGen[x][y] = new Cel(x, y, cellsCurrentGen[x][y].state);
             }
@@ -177,26 +177,26 @@ var life = (function () {
     }
 
     function evolve() {
-        var t0 = performance.now();
+        const t0 = performance.now();
 
         scaleUniverse();
 
-        var xMax = xCapacityUniverse - 1;
-        var yMax = yCapacityUniverse - 1;
+        const xMax = xCapacityUniverse - 1;
+        const yMax = yCapacityUniverse - 1;
 
-        for (var x = 0; x < xCapacityUniverse; x++) {
+        for (let x = 0; x < xCapacityUniverse; x++) {
             // The wrapped x neighbours only change once per column, not per cell.
-            var colPrev = cellsCurrentGen[(x === 0) ? xMax : x - 1];
-            var col = cellsCurrentGen[x];
-            var colNext = cellsCurrentGen[(x === xMax) ? 0 : x + 1];
-            var nextGenCol = cellsNextGen[x];
+            const colPrev = cellsCurrentGen[(x === 0) ? xMax : x - 1];
+            const col = cellsCurrentGen[x];
+            const colNext = cellsCurrentGen[(x === xMax) ? 0 : x + 1];
+            const nextGenCol = cellsNextGen[x];
 
-            for (var y = 0; y < yCapacityUniverse; y++) {
-                var yPrev = (y === 0) ? yMax : y - 1;
-                var yNext = (y === yMax) ? 0 : y + 1;
+            for (let y = 0; y < yCapacityUniverse; y++) {
+                const yPrev = (y === 0) ? yMax : y - 1;
+                const yNext = (y === yMax) ? 0 : y + 1;
 
                 // Unrolled on purpose: quicker than looping over the 8 neighbours.
-                var livingNeighbours = colPrev[yPrev].state
+                const livingNeighbours = colPrev[yPrev].state
                     + col[yPrev].state
                     + colNext[yPrev].state
                     + colPrev[y].state
@@ -205,9 +205,9 @@ var life = (function () {
                     + col[yNext].state
                     + colNext[yNext].state;
 
-                var cel = col[y];
-                var state = cel.state;
-                var newState = 0;
+                const cel = col[y];
+                const state = cel.state;
+                let newState = 0;
 
                 // Evaluate living cell
                 if (state === 1) {
@@ -227,7 +227,7 @@ var life = (function () {
                     }
                 }
 
-                var nextGenCel = nextGenCol[y];
+                const nextGenCel = nextGenCol[y];
                 nextGenCel.state = newState;
                 nextGenCel.statePrevGen = state;
                 nextGenCel.age = cel.age;
@@ -235,11 +235,11 @@ var life = (function () {
         }
 
         // Move Next generation in place for rendering.
-        var tmp = cellsCurrentGen;
+        const tmp = cellsCurrentGen;
         cellsCurrentGen = cellsNextGen;
         cellsNextGen = tmp;
 
-        var t1 = performance.now();
+        const t1 = performance.now();
         log("Call to evolving took " + Math.round(t1 - t0) + " milliseconds.", 'trivial');
 
         if (generation > 0 && !suppressRendering) {
@@ -252,16 +252,16 @@ var life = (function () {
     function scaleUniverse(force) {
         force = force || false;
 
-        var newWidth = window.innerWidth;
-        var newHeight = window.innerHeight;
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
         if (force || newWidth != universeWidth || newHeight != universeHeight) {
             context.canvas.width = newWidth;
             context.canvas.height = newHeight;
 
             universeWidth = newWidth;
             universeHeight = newHeight;
-            var xCapacityPrevUniverse = xCapacityUniverse;
-            var yCapacityPrevUniverse = yCapacityUniverse;
+            const xCapacityPrevUniverse = xCapacityUniverse;
+            const yCapacityPrevUniverse = yCapacityUniverse;
             xCapacityUniverse = Math.ceil(universeWidth / celSize);
             yCapacityUniverse = Math.ceil(universeHeight / celSize);
             log('Canvas size changed to: ' + universeWidth + 'px x ' + universeHeight + 'px');
@@ -274,18 +274,18 @@ var life = (function () {
     }
 
     function drawUniverse() {
-        var t0 = performance.now();
+        const t0 = performance.now();
 
         //var phases = ['dead', 'diedRecently', 'alive'];
         //var phases = [3, 2, 1];
-        var phases = [1];
+        const phases = [1];
         phases.forEach(_render);
 
         if (gridEnabled) {
             drawGrid();
         }
 
-        var t1 = performance.now();
+        const t1 = performance.now();
         log("Call to drawUniverse took " + Math.round(t1 - t0) + " milliseconds.", 'trivial');
 
         sampleFps(t1);
@@ -304,7 +304,7 @@ var life = (function () {
             return;
         }
 
-        var elapsed = now - fpsLastSample;
+        const elapsed = now - fpsLastSample;
         if (elapsed >= fpsSampleInterval) {
             $(fpsSelector).html(Math.round(fpsFrames * 1000 / elapsed) + ' fps');
             fpsFrames = 0;
@@ -330,15 +330,15 @@ var life = (function () {
         context.globalCompositeOperation = "lighter";
 
         // Hoisted out of the cell loop: these never change within a frame.
-        var asRects = celSize < 5;
-        var celOffset = celSize / 2;
-        var celRadius = celSize / 3;
+        const asRects = celSize < 5;
+        const celOffset = celSize / 2;
+        const celRadius = celSize / 3;
 
-        for (var x = 0; x < xCapacityUniverse; x++) {
-            var col = cellsCurrentGen[x];
-            var xPix = x * celSize;
+        for (let x = 0; x < xCapacityUniverse; x++) {
+            const col = cellsCurrentGen[x];
+            const xPix = x * celSize;
 
-            for (var y = 0; y < yCapacityUniverse; y++) {
+            for (let y = 0; y < yCapacityUniverse; y++) {
                 if (!isRenderable(col[y], renderPhase)) {
                     continue;
                 }
@@ -347,8 +347,8 @@ var life = (function () {
                     //_renderCell(x, y, cel, celColor, celInnerColor);
                     context.rect(xPix, y * celSize, celSize, celSize);
                 } else {
-                    var xPos = xPix + celOffset;
-                    var yPos = y * celSize + celOffset;
+                    const xPos = xPix + celOffset;
+                    const yPos = y * celSize + celOffset;
                     context.moveTo(xPos, yPos);
                     context.arc(xPos, yPos, celRadius, 0, endAngle, true);
                 }
@@ -386,22 +386,22 @@ var life = (function () {
         // Circles
         if (cel.age >= maxAgeAnimationThreshold) {
             context.beginPath();
-            var xPos = x * celSize + (celSize / 2)
-            var yPos = y * celSize + (celSize / 2)
+            const xPos = x * celSize + (celSize / 2)
+            const yPos = y * celSize + (celSize / 2)
             context.arc(xPos, yPos, celSize / 20, 0, endAngle, false);
             context.fillStyle = celInnerColor;
             context.fill();
 
             // Fading Circles
-            var innerRadius = 0;
-            var outerRadius = 3 * celSize / ((maxAge / 0.4) / cel.age);
+            const innerRadius = 0;
+            let outerRadius = 3 * celSize / ((maxAge / 0.4) / cel.age);
 
             // if (renderPhase == 'alive' || renderPhase == 'diedRecently') {
             //     if (renderPhase == 'alive') {
             outerRadius = (Math.random() / 2 + 1) * outerRadius;
             // }
 
-            var gradient = context.createRadialGradient(xPos, yPos, innerRadius, xPos, yPos, outerRadius);
+            const gradient = context.createRadialGradient(xPos, yPos, innerRadius, xPos, yPos, outerRadius);
             gradient.addColorStop(0, celInnerColor);
             gradient.addColorStop(0.1, celInnerColor);
             gradient.addColorStop(0.8, "#000");
@@ -416,8 +416,8 @@ var life = (function () {
         }
         else if (celSize > 4) {
             context.beginPath();
-            var xPos = x * celSize + (celSize / 2)
-            var yPos = y * celSize + (celSize / 2)
+            const xPos = x * celSize + (celSize / 2)
+            const yPos = y * celSize + (celSize / 2)
             context.arc(xPos, yPos, celSize / 3, 0, endAngle, true);
             context.fill();
         } else {
@@ -432,13 +432,13 @@ var life = (function () {
 
     function drawGrid() {
         // Horizontal lines
-        for (var y = 0.5; y < universeHeight; y += celSize) {
+        for (let y = 0.5; y < universeHeight; y += celSize) {
             context.moveTo(0, y);
             context.lineTo(universeWidth, y);
         }
 
         // Vertical lines
-        for (var x = 0.5; x < universeWidth; x += celSize) {
+        for (let x = 0.5; x < universeWidth; x += celSize) {
             context.moveTo(x, 0);
             context.lineTo(x, universeHeight);
         }
@@ -450,12 +450,12 @@ var life = (function () {
     function log(message, level) {
         level = (typeof level !== 'undefined') ? level : "debug";
 
-        var shouldLog = false;
-        if (verboseMode && level == 'debug') {
+        let shouldLog = false;
+        if (verboseMode && level === 'debug') {
             shouldLog = true;
         } else if (extremeVerboseMode) {
             shouldLog = true;
-        } else if (level == 'error') {
+        } else if (level === 'error') {
             shouldLog = true;
         }
 
