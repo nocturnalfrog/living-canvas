@@ -113,6 +113,22 @@ footer .inner:hover .controls {
   max-height: 180px;
 }
 
+.github-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  line-height: 0;
+  opacity: 0.85;
+  transition: opacity 0.3s;
+}
+.github-corner:hover {
+  opacity: 1;
+}
+.github-corner img {
+  border: 0;
+  display: block;
+}
+
 #fps {
   position: absolute;
   right: 10px;
