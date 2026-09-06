@@ -41,6 +41,7 @@ var life = (function () {
     var generation = 0;
 
     var evolutionTimer = null;
+    var lastEvolvedAt = 0;
     var suppressRendering = false;
 
     // FPS counter
@@ -94,13 +95,31 @@ var life = (function () {
         // Don't average over the time we were paused.
         fpsFrames = 0;
         fpsLastSample = 0;
-        evolutionTimer = setInterval(evolve, cycleTime);
+        lastEvolvedAt = 0;
+        evolutionTimer = requestAnimationFrame(scheduleEvolve);
+    }
+
+    /**
+     * Drives evolution off the display's refresh rate instead of setInterval, so we
+     * never compute a generation the screen won't show, and a generation that runs
+     * long can't queue up back-to-back callbacks. cycleTime acts as a lower bound
+     * and is therefore quantised to whole frames.
+     */
+    function scheduleEvolve(now) {
+        evolutionTimer = requestAnimationFrame(scheduleEvolve);
+
+        if (now - lastEvolvedAt < cycleTime) {
+            return;
+        }
+
+        lastEvolvedAt = now;
+        evolve();
     }
 
     function stopEvolving() {
         log("Halting evolution.");
         $(startStopButtonSelector).html('Start');
-        clearInterval(evolutionTimer);
+        cancelAnimationFrame(evolutionTimer);
         evolutionTimer = null;
     }
 
@@ -162,44 +181,61 @@ var life = (function () {
 
         scaleUniverse();
 
-        for (var x = 0; x < cellsCurrentGen.length; x++) {
-            for (var y = 0; y < cellsCurrentGen[x].length; y++) {
-                var newState = 0;
-                var cel = cellsCurrentGen[x][y];
+        var xMax = xCapacityUniverse - 1;
+        var yMax = yCapacityUniverse - 1;
 
-                var livingNeighbours = countLivingNeighbours(cel, cellsCurrentGen);
-                cel.livingNeighbours = livingNeighbours;
+        for (var x = 0; x < xCapacityUniverse; x++) {
+            // The wrapped x neighbours only change once per column, not per cell.
+            var colPrev = cellsCurrentGen[(x === 0) ? xMax : x - 1];
+            var col = cellsCurrentGen[x];
+            var colNext = cellsCurrentGen[(x === xMax) ? 0 : x + 1];
+            var nextGenCol = cellsNextGen[x];
+
+            for (var y = 0; y < yCapacityUniverse; y++) {
+                var yPrev = (y === 0) ? yMax : y - 1;
+                var yNext = (y === yMax) ? 0 : y + 1;
+
+                // Unrolled on purpose: quicker than looping over the 8 neighbours.
+                var livingNeighbours = colPrev[yPrev].state
+                    + col[yPrev].state
+                    + colNext[yPrev].state
+                    + colPrev[y].state
+                    + colNext[y].state
+                    + colPrev[yNext].state
+                    + col[yNext].state
+                    + colNext[yNext].state;
+
+                var cel = col[y];
+                var state = cel.state;
+                var newState = 0;
 
                 // Evaluate living cell
-                if (cel.state === 1) {
-                    if (livingNeighbours == 2 || livingNeighbours == 3) {
-                        // Living cell proceed to the next generation
+                if (state === 1) {
+                    if (livingNeighbours === 2 || livingNeighbours === 3) {
+                        // Living cell proceeds to the next generation
                         newState = 1;
                         cel.age = cel.age + 1;
                     } else {
                         // Living cell dies of either overcrowding / under-population
-                        newState = 0;
                         cel.age = 0;
                     }
                 } else {
                     // Evaluate dead cell
-                    if (livingNeighbours == 3) {
+                    if (livingNeighbours === 3) {
                         newState = 1;
                         cel.age = 0;
                     }
                 }
 
-                var nextGenCel = cellsNextGen[x][y];
+                var nextGenCel = nextGenCol[y];
                 nextGenCel.state = newState;
-                nextGenCel.statePrevGen = cel.state;
+                nextGenCel.statePrevGen = state;
                 nextGenCel.age = cel.age;
             }
         }
 
-
         // Move Next generation in place for rendering.
-        var tmp;
-        tmp = cellsCurrentGen;
+        var tmp = cellsCurrentGen;
         cellsCurrentGen = cellsNextGen;
         cellsNextGen = tmp;
 
@@ -211,26 +247,6 @@ var life = (function () {
         }
 
         generation++;
-    }
-
-    function countLivingNeighbours(cel, generation) {
-        // Wrapping the universe
-        var xStart = ((cel.x - 1) < 0) ? xCapacityUniverse - 1 : (cel.x - 1);
-        var yStart = ((cel.y - 1) < 0) ? yCapacityUniverse - 1 : (cel.y - 1);
-        var xStop = ((cel.x + 1) >= xCapacityUniverse) ? 0 : (cel.x + 1);
-        var yStop = ((cel.y + 1) >= yCapacityUniverse) ? 0 : (cel.y + 1);
-
-        // This is quicker then using for loops.
-        return (
-            generation[xStart][yStart].state
-            + generation[cel.x][yStart].state
-            + generation[xStop][yStart].state
-            + generation[xStart][cel.y].state
-            + generation[xStop][cel.y].state
-            + generation[xStart][yStop].state
-            + generation[cel.x][yStop].state
-            + generation[xStop][yStop].state
-        );
     }
 
     function scaleUniverse(force) {
@@ -313,54 +329,49 @@ var life = (function () {
         //context.globalCompositeOperation = "source-over";
         context.globalCompositeOperation = "lighter";
 
+        // Hoisted out of the cell loop: these never change within a frame.
+        var asRects = celSize < 5;
+        var celOffset = celSize / 2;
+        var celRadius = celSize / 3;
 
-        var celColor, celInnerColor, cel, render;
         for (var x = 0; x < xCapacityUniverse; x++) {
+            var col = cellsCurrentGen[x];
+            var xPix = x * celSize;
+
             for (var y = 0; y < yCapacityUniverse; y++) {
-                render = false;
-                cel = cellsCurrentGen[x][y];
-
-                if (renderPhase === 1 && cel.state) { // Alive
-                    render = true;
-                    celColor = fillColorLiveCells;
-                    //celColor = 'rgba(125, 125, ' + (125 + cel.age * 3) + ', 0.5)';
-                }
-                else if (renderPhase == 2 && cel.statePrevGen == 0 && cel.state == 0) { // Dead
-                    render = false;
-                    celColor = fillColorDeadCells;
-                    celInnerColor = "#000";
-                } else if (renderPhase == 3 && cel.statePrevGen == 1 && cel.state == 0) { // DiedRecently
-                    render = true;
-                    celColor = fillColorRecentlyDeadCells;
-                    celInnerColor = "#000";
+                if (!isRenderable(col[y], renderPhase)) {
+                    continue;
                 }
 
-                if (render) {
-                    if (celSize < 5) {
-                        //_renderCell(x, y, cel, celColor, celInnerColor);
-                        context.rect(x * celSize, y * celSize, celSize, celSize);
-                    } else {
-                        var xPos = x * celSize + (celSize / 2)
-                        var yPos = y * celSize + (celSize / 2)
-                        context.moveTo(xPos, yPos);
-                        context.arc(xPos, yPos, celSize / 3, 0, endAngle, true);
-                    }
-
+                if (asRects) {
+                    //_renderCell(x, y, cel, celColor, celInnerColor);
+                    context.rect(xPix, y * celSize, celSize, celSize);
+                } else {
+                    var xPos = xPix + celOffset;
+                    var yPos = y * celSize + celOffset;
+                    context.moveTo(xPos, yPos);
+                    context.arc(xPos, yPos, celRadius, 0, endAngle, true);
                 }
-
-                //if (showLabels) {
-                //    //var label = x + "," + y;
-                //    var label = cel.livingNeighbours + ' (' + cel.livingNeighboursPrevGen + ')';
-                //    var labelX = x * agedCelSize + 3.5
-                //    var labelY = y * agedCelSize + 14.5
-                //    context.font = "14px sans-serif";
-                //    context.fillStyle = fillColorLabels;
-                //    context.fillText(label, labelX, labelY);
-                //}
             }
         }
 
         context.fill();
+    }
+
+    /**
+     * Phase 1 = alive, 2 = dead, 3 = died recently. Only phase 1 is drawn today;
+     * dead cells are left to the semi-transparent overlay that creates the trails.
+     */
+    function isRenderable(cel, renderPhase) {
+        if (renderPhase === 1) {
+            return cel.state === 1;
+        }
+
+        if (renderPhase === 3) {
+            return cel.statePrevGen === 1 && cel.state === 0;
+        }
+
+        return false;
     }
 
     /**
