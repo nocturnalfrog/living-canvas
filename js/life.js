@@ -43,6 +43,12 @@ var life = (function () {
     var evolutionTimer = null;
     var suppressRendering = false;
 
+    // FPS counter
+    var fpsSelector;
+    var fpsFrames = 0;
+    var fpsLastSample = 0;
+    var fpsSampleInterval = 500;
+
     // Calculate the endAngle of full circle once for extra performance
     var endAngle = 2 * Math.PI;
     // Calculate the maxAgeAnimationThreshold once for extra performance
@@ -57,6 +63,7 @@ var life = (function () {
         celSize = (typeof options.celSize !== 'undefined') ? options.celSize : celSize;
         cycleTime = (typeof options.cycleTime !== 'undefined') ? options.cycleTime : cycleTime;
         startStopButtonSelector = (typeof options.startStopButtonSelector !== 'undefined') ? options.startStopButtonSelector : '';
+        fpsSelector = (typeof options.fpsSelector !== 'undefined') ? options.fpsSelector : '';
         canvas = $(universeSelector).get(0);
         context = canvas.getContext('2d');
 
@@ -84,6 +91,9 @@ var life = (function () {
     function startEvolving() {
         log("Starting Evolution...");
         $(startStopButtonSelector).html('Stop');
+        // Don't average over the time we were paused.
+        fpsFrames = 0;
+        fpsLastSample = 0;
         evolutionTimer = setInterval(evolve, cycleTime);
     }
 
@@ -261,6 +271,29 @@ var life = (function () {
 
         var t1 = performance.now();
         log("Call to drawUniverse took " + Math.round(t1 - t0) + " milliseconds.", 'trivial');
+
+        sampleFps(t1);
+    }
+
+    // Counts rendered frames and publishes an averaged rate every fpsSampleInterval ms.
+    function sampleFps(now) {
+        if (!fpsSelector) {
+            return;
+        }
+
+        fpsFrames++;
+
+        if (fpsLastSample === 0) {
+            fpsLastSample = now;
+            return;
+        }
+
+        var elapsed = now - fpsLastSample;
+        if (elapsed >= fpsSampleInterval) {
+            $(fpsSelector).html(Math.round(fpsFrames * 1000 / elapsed) + ' fps');
+            fpsFrames = 0;
+            fpsLastSample = now;
+        }
     }
 
     function _render(renderPhase) {

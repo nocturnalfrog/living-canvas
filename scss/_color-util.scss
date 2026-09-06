@@ -1,0 +1,12 @@
+@use "sass:color";
+@use "sass:math";
+
+/// Round a color's channels to integers so Sass emits `rgb(60, 60, 60)`
+/// instead of `rgb(23.6666666667%, ...)` after color.adjust().
+@function solid($c) {
+  @return rgb(
+    math.round(color.channel($c, "red", $space: rgb)),
+    math.round(color.channel($c, "green", $space: rgb)),
+    math.round(color.channel($c, "blue", $space: rgb))
+  );
+}

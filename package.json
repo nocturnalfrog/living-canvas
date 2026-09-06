@@ -1,0 +1,11 @@
+{
+  "name": "living-canvas",
+  "private": true,
+  "scripts": {
+    "css": "sass scss/universe.scss css/universe.css --no-source-map --style=expanded",
+    "watch": "sass --watch scss/universe.scss css/universe.css --no-source-map --style=expanded"
+  },
+  "devDependencies": {
+    "sass": "^1.104.0"
+  }
+}

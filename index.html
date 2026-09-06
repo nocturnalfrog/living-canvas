@@ -58,8 +58,7 @@
                 $("#celsize").val(celSize);
                 updateRangeLabel("#celsize_label", celSize, 'px');
 
-
-                var cycleTime = 240;
+                var cycleTime = 30;
                 $("#lifetime").val(cycleTime);
                 updateRangeLabel("#lifetime_label", cycleTime, 'ms');
 
@@ -70,7 +69,8 @@
                     debugMode: true,
                     celSize: celSize,
                     cycleTime: cycleTime,
-                    startStopButtonSelector: '#startstop'
+                    startStopButtonSelector: '#startstop',
+                    fpsSelector: '#fps'
                 });
                 myLife.startEvolving();
             });
@@ -95,7 +95,7 @@
                     </div>
                     <div class="range-slider">
                         <label>Generation lifetime: </label><span id="lifetime_label">999ms</span><br>
-                        <input type="range" name="lifetime" id="lifetime" step="10" min="20" max="1000"><br>
+                        <input type="range" name="lifetime" id="lifetime" step="10" min="15" max="1000"><br>
                     </div>
 
                     <div class="range-slider">
@@ -108,5 +108,6 @@
                 </div>
             </div>
         </footer>
+        <div id="fps">– fps</div>
     </body>
 </html>

@@ -1,7 +1,7 @@
-@import "compass";
-@import "buttons";
-@import "shadows";
-//@import "compass/css3/transition";
+@use "sass:color";
+@use "color-util" as *;
+@use "buttons" as *;
+@use "shadows" as *;
 
 // Variables
 $bg: #FFF;
@@ -18,7 +18,7 @@ body {
   font-size: $text-size;
 }
 
-h1{
+h1 {
   font-size: $title-size;
   padding: 0;
   margin: 0;
@@ -27,7 +27,7 @@ h1{
   text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.6);
 }
 
-label{
+label {
   font-weight: bold;
 }
 
@@ -37,66 +37,59 @@ canvas {
   bottom: 0;
 }
 
-.button{
+.button {
   @include button;
   @include color(#444);
-  text-transform: capitalize ;
+  text-transform: capitalize;
 }
 
-#universe{
+#universe {
   width: 100%;
   height: 100%;
   background-color: $bg;
 }
 
-.settings-toggle{
+.settings-toggle {
   margin: 4px 14px;
 }
 
-footer{
+footer {
   position: absolute;
   bottom: 0px;
   width: 100%;
 
-
-  .inner{
-//    @include opacity(0.95);
-
+  .inner {
     display: inline-block;
     margin-bottom: 2px;
 
-    .cogwheel{
+    .cogwheel {
       display: inline-block;
       margin-bottom: -5px;
-      @include transition-duration(3s);
-      @include transition-timing-function('ease-in-out');
+      transition: transform 3s ease-in-out;
     }
 
-    .controls{
+    .controls {
       max-height: 0px;
       padding: 0 12px;
       overflow: hidden;
-      @include transition-property(all);
-      @include transition-duration(0.5s);
-      @include transition-delay(1s);
+      transition: all 0.5s 1s;
       margin-top: 0px;
-      background-color: darken($bg, 85);
+      background-color: solid(color.adjust($bg, $lightness: -85%));
       @include box-shadow(0px, 4px, 4px, #000);
 
-      &>div{
+      & > div {
         margin: 10px 0;
         padding: 2px 0 10px;
       }
     }
 
-    &:hover{
-      .cogwheel{
-        @include rotate(180deg);
-        @include transition-duration(3s);
+    &:hover {
+      .cogwheel {
+        transform: rotate(180deg);
       }
 
-      .controls{
-        @include transition-delay(0.2s);
+      .controls {
+        transition-delay: 0.2s;
         @include box-shadow(6px, 4px, 4px, #000);
         max-height: 180px;
       }
@@ -104,7 +97,19 @@ footer{
   }
 }
 
+#fps {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  font-family: monospace;
+  font-size: $text-size;
+  color: $text-color;
+  opacity: 0.6;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
 #lifetime,
-#celsize{
+#celsize {
   width: 180px;
 }
