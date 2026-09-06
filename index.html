@@ -10,61 +10,78 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
         <script src="/js/life.js"></script>
         <script>
-            function updateRangeLabel(id, value, suffix) {
-                $(id).html(value + suffix);
-            }
-
             $(document).ready(function () {
+                const $showGrid = $("#showGrid");
+                const $startStop = $("#startstop");
+                const $next = $("#next");
+                const $reset = $("#reset");
+                const $lifetime = $("#lifetime");
+                const $lifetimeLabel = $("#lifetime_label");
+                const $celSize = $("#celsize");
+                const $celSizeLabel = $("#celsize_label");
+
+                function updateRangeLabel($label, value, suffix) {
+                    $label.html(value + suffix);
+                }
+
                 // EventListeners
-                $("#showGrid").click(function () {
+                $showGrid.click(function () {
                     myLife.setGridEnabled(this.checked);
                 });
 
-                $("#startstop").click(function () {
+                $startStop.click(function () {
                     myLife.toggleEvolution();
                 });
 
-                $("#next").click(function () {
+                $next.click(function () {
                     myLife.evolve();
                 });
 
-                $("#reset").click(function () {
+                $reset.click(function () {
                     myLife.resetUniverse();
                 });
 
-                $("#lifetime").change(function () {
-                    var newCycleTime = $("#lifetime").val();
-                    updateRangeLabel("#lifetime_label", newCycleTime, 'ms');
+                $lifetime.change(function () {
+                    const newCycleTime = $lifetime.val();
+                    updateRangeLabel($lifetimeLabel, newCycleTime, 'ms');
                     myLife.setCycleTime(newCycleTime);
                 });
 
-                $("#celsize").change(function () {
-                    var newCelSize = $("#celsize").val();
-                    updateRangeLabel("#celsize_label", newCelSize, 'px');
+                $celSize.change(function () {
+                    const newCelSize = $celSize.val();
+                    updateRangeLabel($celSizeLabel, newCelSize, 'px');
                     myLife.setCelSize(newCelSize);
                 });
 
-                $("#celsize").mousemove(function () {
-                    updateRangeLabel("#celsize_label", $("#celsize").val(), 'px');
+                $celSize.mousemove(function () {
+                    updateRangeLabel($celSizeLabel, $celSize.val(), 'px');
                 });
 
-                $("#lifetime").mousemove(function () {
-                    updateRangeLabel("#lifetime_label", $("#lifetime").val(), 'ms');
+                $lifetime.mousemove(function () {
+                    updateRangeLabel($lifetimeLabel, $lifetime.val(), 'ms');
+                });
+
+                $(document).keydown(function (event) {
+                    // Space toggles evolution, unless a form control has focus (space is its own activator there).
+                    if (event.which !== 32 || $(event.target).is('input, button, select, textarea')) {
+                        return;
+                    }
+                    event.preventDefault();
+                    myLife.toggleEvolution();
                 });
 
 
                 // Initialization
-                var celSize = 5;
-                $("#celsize").val(celSize);
-                updateRangeLabel("#celsize_label", celSize, 'px');
+                const celSize = 5;
+                $celSize.val(celSize);
+                updateRangeLabel($celSizeLabel, celSize, 'px');
 
-                var cycleTime = 30;
-                $("#lifetime").val(cycleTime);
-                updateRangeLabel("#lifetime_label", cycleTime, 'ms');
+                const cycleTime = 30;
+                $lifetime.val(cycleTime);
+                updateRangeLabel($lifetimeLabel, cycleTime, 'ms');
 
 
-                var myLife;
-                myLife = life.createUniverse('#universe', {
+                const myLife = life.createUniverse('#universe', {
                     hasGrid: false,
                     debugMode: true,
                     celSize: celSize,
