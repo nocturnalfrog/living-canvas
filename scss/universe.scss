@@ -55,12 +55,13 @@ canvas {
 
 footer {
   position: absolute;
-  bottom: 0px;
+  bottom: 0;
   width: 100%;
 
   .inner {
     display: inline-block;
-    margin-bottom: 2px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding-bottom: 4px;
 
     .cogwheel {
       display: inline-block;
@@ -69,11 +70,11 @@ footer {
     }
 
     .controls {
-      max-height: 0px;
+      max-height: 0;
       padding: 0 12px;
       overflow: hidden;
       transition: all 0.5s 1s;
-      margin-top: 0px;
+      margin-top: 0;
       background-color: solid(color.adjust($bg, $lightness: -85%));
       @include box-shadow(0px, 4px, 4px, #000);
 
@@ -91,7 +92,7 @@ footer {
       .controls {
         transition-delay: 0.2s;
         @include box-shadow(6px, 4px, 4px, #000);
-        max-height: 180px;
+        max-height: 240px;
       }
     }
   }

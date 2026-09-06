@@ -20,7 +20,8 @@ const life = (function () {
 
     // var fillColorLiveCells = '#AB23CC';
     let fillColorLiveCells = 'rgba(240, 80, 235, 1)';
-    const generationOverlayColor = "rgba(0, 0, 0, 0.4)"
+    let decayGenerations = 8;
+    let generationOverlayColor = "rgba(0, 0, 0, 0.4)";
     // var fillColorLiveCells = 'rgba(220, 90, 255, 1)';
     const fillColorDeadCells = '#000';
     const fillColorRecentlyDeadCells = "rgba(0, 0, 0, 0.9)";
@@ -63,11 +64,13 @@ const life = (function () {
         gridEnabled = (typeof options.hasGrid !== 'undefined') ? options.hasGrid : gridEnabled;
         celSize = (typeof options.celSize !== 'undefined') ? options.celSize : celSize;
         cycleTime = (typeof options.cycleTime !== 'undefined') ? options.cycleTime : cycleTime;
+        decayGenerations = (typeof options.decayGenerations !== 'undefined') ? options.decayGenerations : decayGenerations;
         startStopButtonSelector = (typeof options.startStopButtonSelector !== 'undefined') ? options.startStopButtonSelector : '';
         fpsSelector = (typeof options.fpsSelector !== 'undefined') ? options.fpsSelector : '';
         canvas = $(universeSelector).get(0);
         context = canvas.getContext('2d');
 
+        updateGenerationOverlayColor();
         scaleUniverse();
 
         return this;
@@ -131,6 +134,28 @@ const life = (function () {
             stopEvolving();
             startEvolving();
         }
+    }
+
+    function setDecayGenerations(newDecayGenerations) {
+        decayGenerations = newDecayGenerations;
+
+        updateGenerationOverlayColor();
+    }
+
+    /**
+     * The overlay is painted once per generation, so the residual brightness of a
+     * cell after n generations is (1 - alpha)^n. Solve for a 2% residual to get the
+     * alpha that makes a trail visually gone after decayGenerations generations.
+     */
+    function updateGenerationOverlayColor() {
+        const generations = Number(decayGenerations);
+
+        if (generations <= 1) {
+            generationOverlayColor = "rgba(0, 0, 0, 1)";
+            return;
+        }
+
+        generationOverlayColor = "rgba(0, 0, 0, " + (1 - Math.pow(0.02, 1 / generations)) + ")";
     }
 
     function setCelSize(newCelSize) {
@@ -313,16 +338,14 @@ const life = (function () {
     }
 
     function _render(renderPhase) {
-        //Moving this BG paint code insde draw() will help remove the trail
-        //of the particle
-        //Lets paint the canvas black
-        //But the BG paint shouldn't blend with the previous frame
+        // Moving this BG paint code inside draw() will help remove the trail of the particles
+        // Paint the canvas black but the BG paint shouldn't blend with the previous frame
         context.globalCompositeOperation = "source-over";
-        //Lets reduce the opacity of the BG paint to give the final touch
+        // Reduce the opacity of the BG paint to give the final touch
         context.fillStyle = generationOverlayColor;
         context.fillRect(0, 0, universeWidth, universeHeight);
 
-        //Lets blend the particle with the BG
+        // Blend the particle with the BG
         context.beginPath();  // path commands must begin with beginPath
         context.fillStyle = fillColorLiveCells;
 
@@ -477,6 +500,7 @@ const life = (function () {
         startEvolving: startEvolving,
         stopEvolving: stopEvolving,
         setCycleTime: setCycleTime,
-        setCelSize: setCelSize
+        setCelSize: setCelSize,
+        setDecayGenerations: setDecayGenerations
     }
 }());

@@ -19,6 +19,8 @@
                 const $lifetimeLabel = $("#lifetime_label");
                 const $celSize = $("#celsize");
                 const $celSizeLabel = $("#celsize_label");
+                const $decay = $("#decay");
+                const $decayLabel = $("#decay_label");
 
                 function updateRangeLabel($label, value, suffix) {
                     $label.html(value + suffix);
@@ -53,6 +55,16 @@
                     myLife.setCelSize(newCelSize);
                 });
 
+                $decay.change(function () {
+                    const newDecayGenerations = $decay.val();
+                    updateRangeLabel($decayLabel, newDecayGenerations, ' gen');
+                    myLife.setDecayGenerations(newDecayGenerations);
+                });
+
+                $decay.mousemove(function () {
+                    updateRangeLabel($decayLabel, $decay.val(), ' gen');
+                });
+
                 $celSize.mousemove(function () {
                     updateRangeLabel($celSizeLabel, $celSize.val(), 'px');
                 });
@@ -80,12 +92,17 @@
                 $lifetime.val(cycleTime);
                 updateRangeLabel($lifetimeLabel, cycleTime, 'ms');
 
+                const decayGenerations = 8;
+                $decay.val(decayGenerations);
+                updateRangeLabel($decayLabel, decayGenerations, ' gen');
+
 
                 const myLife = life.createUniverse('#universe', {
                     hasGrid: false,
                     debugMode: true,
                     celSize: celSize,
                     cycleTime: cycleTime,
+                    decayGenerations: decayGenerations,
                     startStopButtonSelector: '#startstop',
                     fpsSelector: '#fps'
                 });
@@ -118,6 +135,11 @@
                     <div class="range-slider">
                         <label>Cel Size: </label><span id="celsize_label">999px</span><br>
                         <input type="range" name="size" id="celsize" min="1" max="60"><br>
+                    </div>
+
+                    <div class="range-slider">
+                        <label>Decay Speed: </label><span id="decay_label">99 gen</span><br>
+                        <input type="range" name="decay" id="decay" step="1" min="1" max="60"><br>
                     </div>
                     <!--<div class="advanced">-->
                     <!--<label><input type="checkbox" id="showGrid" name="showGrid" value="">Show Grid</label><br>-->
